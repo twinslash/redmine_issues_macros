@@ -3,11 +3,11 @@ require 'redmine_issues_macros'
 require 'uri'
 Redmine::Plugin.register :redmine_issues_macros do
   name 'Redmine Issues Macros plugin'
-  author 'Author name'
-  description 'This is a plugin for Redmine'
+  author 'Twinslash'
+  description 'Add child_issues macros for issue description'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'https://github.com/twinslash/redmine_issues_macros'
+  author_url 'twinslash.com'
 end
 
 Redmine::WikiFormatting::Macros.register do
