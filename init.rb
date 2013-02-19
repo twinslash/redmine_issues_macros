@@ -14,11 +14,10 @@ Redmine::WikiFormatting::Macros.register do
   desc "Insert the name of the current user. Example: !{{username}}"
   macro :child_issues do |obj, args|
 
-    if params[:controller] == 'issues' && params[:action] == 'show'
-      content = @issue.tree_child.insert(0, "<br/>")
+    if params[:controller] == 'issues'
+      content = Issue.find(obj.id).tree_child.insert(0, "<br/>")
       links = URI::extract( content, ['http', 'https'] )
       content = auto_link content
     end
-
   end
 end

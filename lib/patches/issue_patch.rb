@@ -14,7 +14,7 @@ module IssuePatch
            self.children.each_with_index do |child|
 
             size = size_def(child)
-            content += "  <h#{size}> Task##{child.id} #{child.subject} </h#{size}>"
+            content += "  <h#{size}> #{child.subject} (<a href=\"/issues/#{child.id}\">#{child.id}</a>) </h#{size}>"
             content += RedCloth.new(child.description).to_html + "<br>"
             child.tree_child
           end
