@@ -11,7 +11,7 @@ Redmine::Plugin.register :redmine_issues_macros do
 end
 
 Redmine::WikiFormatting::Macros.register do
-  desc "Insert the name of the current user. Example: !{{username}}"
+  desc "Insert the description of the sub tasks. Example: !{{child_issues}}"
   macro :child_issues do |obj, args|
 
     if params[:controller] == 'issues'
