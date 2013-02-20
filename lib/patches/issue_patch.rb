@@ -3,20 +3,13 @@ module IssuePatch
 
     base.class_eval do
 
-      def size_def(issue, size = 2)
-        size = size_def(issue.parent, size + 1) if issue.parent_id?
-        size
-      end
-
-      def tree_child
-        content = ""
-        if self.children?
+      def tree_child(level_arg, subject_arg, task_arg)
+        content ||= ""
+        if level_arg >= 0
            self.children.each_with_index do |child|
-
-            size = size_def(child)
-            content += "  <h#{size}> #{child.subject} (<a href=\"/issues/#{child.id}\">#{child.id}</a>) </h#{size}>"
+            content += "  <h#{subject_arg}> #{child.subject} #{task_arg.empty? ? "" : "##{child.id}"} </h#{subject_arg}>"
             content += RedCloth.new(child.description).to_html + "<br>"
-            child.tree_child
+            content += child.tree_child(level_arg - 1, subject_arg + 1, task_arg)
           end
         end
         return content
