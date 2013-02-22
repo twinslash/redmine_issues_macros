@@ -43,7 +43,7 @@ Redmine::WikiFormatting::Macros.register do
     end
   end
 
-  desc "Insert the description of the related tasks. Example: !{{child_issues}}"
+  desc "Insert the description of the related tasks. Example: !{{related_issues}}"
   macro :related_issues do |obj, args|
 
       level_arg, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
@@ -75,5 +75,32 @@ Redmine::WikiFormatting::Macros.register do
     end
   end
 
+  desc "Insert the description of the passed tasks. Example: !{{issue}}"
+  macro :issue do |obj, args|
 
+      task_id, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
+
+      if task_id.nil? || task_id == ''
+        content = 'Fill the necessary argument: !{{issue(task_id)}}'
+      else
+        task_id = task_id.to_i
+
+        if subject_arg.nil? || subject_arg.empty?
+          subject_arg = 3
+        else
+          subject_arg = subject_arg.to_i unless subject_arg == 'none'
+        end
+
+          content = Issue.find(task_id).representate_issue(subject_arg, task_arg).insert(0, "<br/>")
+          content = auto_link content
+          case task_arg
+            when "link"
+              content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
+            when "full"
+              content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
+            else
+              content.gsub!(/ #(\d+)/,"").html_safe
+          end
+      end
+  end
 end
