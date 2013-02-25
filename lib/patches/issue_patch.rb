@@ -69,8 +69,6 @@ module IssuePatch
           end
           content += RedCloth.new(self.description).to_html + "<br>"
         end
-        p "content from representate================="
-        p content
         return content
       end
     end
