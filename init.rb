@@ -4,7 +4,7 @@ require 'uri'
 Redmine::Plugin.register :redmine_issues_macros do
   name 'Redmine Issues Macros plugin'
   author 'Twinslash'
-  description 'Add child_issues macros for issue description'
+  description 'Add child_issues, related_issues macroses for issue description and issue(id) for wiki pages'
   version '0.0.1'
   url 'https://github.com/twinslash/redmine_issues_macros'
   author_url 'twinslash.com'
