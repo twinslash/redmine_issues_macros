@@ -1,7 +1,7 @@
 require 'patches/issue_patch'
 
 Rails.configuration.to_prepare do
-  Issue.send(:include, IssuePatch)
+  ApplicationHelper.send(:include, IssuePatch)
 end
 
 

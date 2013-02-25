@@ -28,84 +28,65 @@ Redmine::WikiFormatting::Macros.register do
         subject_arg = subject_arg.to_i unless subject_arg == 'none'
       end
 
-
-    if params[:controller] == 'issues'
-      content = Issue.find(obj.id).tree_child(level_arg, subject_arg, task_arg).insert(0, "<br/>")
-      content = auto_link content
-      case task_arg
-        when "link"
-          content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
-        when "full"
-          content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
-        else
-          content.gsub!(/ #(\d+)/,"").html_safe
-      end
-    end
+      content = textilizable(tree_child(Issue.find(obj.id),level_arg, subject_arg, task_arg))
   end
 
   desc "Insert the description of the related tasks. Example: !{{related_issues}}"
   macro :related_issues do |obj, args|
 
-      level_arg, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
+    level_arg, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
 
-      if level_arg.nil? || level_arg == ''
-        level_arg = 'all'
-      else
-        level_arg = level_arg.to_i
-      end
-
-      if subject_arg.nil? || subject_arg.empty?
-        subject_arg = 3
-      else
-        subject_arg = subject_arg.to_i unless subject_arg == 'none'
-      end
-
-
-    if params[:controller] == 'issues'
-      content = Issue.find(obj.id).tree_related(level_arg, subject_arg, task_arg).insert(0, "<br/>")
-      content = auto_link content
-      case task_arg
-        when "link"
-          content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
-        when "full"
-          content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
-        else
-          content.gsub!(/ #(\d+)/,"").html_safe
-      end
+    if level_arg.nil? || level_arg == ''
+      level_arg = 'all'
+    else
+      level_arg = level_arg.to_i
     end
+
+    if subject_arg.nil? || subject_arg.empty?
+      subject_arg = 3
+    else
+      subject_arg = subject_arg.to_i unless subject_arg == 'none'
+    end
+
+    content = textilizable(tree_related(Issue.find(obj.id),level_arg, subject_arg, task_arg))
   end
 
   desc "Insert the description of the passed tasks. Example: !{{issue}}"
   macro :issue do |obj, args|
 
-      task_id, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
-
-      if task_id.nil? || task_id == ''
-        content = 'Fill the necessary argument: !{{issue(task_id)}}'
-      else
-        task_id = task_id.to_i
-        if User.current.allowed_to?(:view_issues, Issue.find(task_id).project)
-          if subject_arg.nil? || subject_arg.empty?
-            subject_arg = 3
-          else
-            subject_arg = subject_arg.to_i unless subject_arg == 'none'
-          end
-
-            content = Issue.find(task_id).representate_issue(subject_arg, task_arg).insert(0, "<br/>")
-            content.gsub!(/(\{\{related_issues.*\}\})/) { Issue.find(task_id).tree_related('all', subject_arg, task_arg)}
-            content.gsub!(/(\{\{child_issues.*\}\})/) { Issue.find(task_id).tree_child('all', subject_arg, task_arg)}
-            content = auto_link content
-            case task_arg
-              when "link"
-                content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
-              when "full"
-                content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
-              else
-                content.gsub!(/ #(\d+)/,"").html_safe
-            end
+    task_id, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
+    issue = Issue.find(task_id)
+    if task_id.nil? || task_id == ''
+      content = 'Fill the necessary argument: !{{issue(task_id)}}'
+    else
+      content ||= ""
+      task_id = task_id.to_i
+      if User.current.allowed_to?(:view_issues, issue.project)
+        if subject_arg.nil? || subject_arg.empty?
+          subject_arg = 3
         else
-            ""
+          subject_arg = subject_arg.to_i unless subject_arg == 'none'
         end
+
+        if subject_arg == 'none'
+        content += ""
+        elsif subject_arg.is_a?(Fixnum)
+          content += "\r\n\r\n"
+          case task_arg
+            when 'full'
+              content += "h#{subject_arg}. #{issue.tracker.name} ##{issue.id} #{issue.subject}"
+            when 'link'
+              content += "h#{subject_arg}. #{issue.subject} ##{issue.id}"
+            else
+              content += "h#{subject_arg}. #{issue.subject}"
+          end
+          content += "\r\n\r\n"
+        end
+        content += textilizable(issue, :description)
+      else
+        "N/A"
       end
+    end
+    content.html_safe
   end
 end

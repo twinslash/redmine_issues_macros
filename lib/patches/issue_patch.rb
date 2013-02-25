@@ -3,52 +3,53 @@ module IssuePatch
 
     base.class_eval do
 
-      def tree_child(level_arg, subject_arg, task_arg)
-        content ||= ""
+      def tree_child(issue, level_arg, subject_arg, task_arg)
+        content ||= "\r\n"
         if level_arg == 'all' || level_arg > 0
-          self.children.each_with_index do |child|
+          issue.children.each do |child|
+            content += "\r\n\r\n"
             if subject_arg == 'none'
               content += ""
             elsif subject_arg.is_a?(Fixnum)
               case task_arg
                 when 'full'
-                  content += " <h#{subject_arg}> ##{child.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{child.tracker.name} ##{child.id} #{child.subject}"
                 when 'link'
-                  content += " <h#{subject_arg}> #{child.subject} ##{child.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{child.subject} ##{child.id}"
                 else
-                  content += " <h#{subject_arg}> #{child.subject} ##{child.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{child.subject}"
               end
             end
-            content += RedCloth.new(child.description).to_html + "<br>"
-            content += child.tree_child(level_arg=='all' ? 'all' : level_arg -1, subject_arg == 'none' ? 'none' : subject_arg + 1, task_arg)
+            content += "\r\n\r\n#{child.description}"
+            content += tree_child(child, level_arg == 'all' ? 'all' : level_arg -1, subject_arg == 'none' ? 'none' : subject_arg + 1, task_arg)
+            content += "\r\n\r\n"
           end
         end
         return content
       end
 
 
-      def tree_related(level_arg, subject_arg, task_arg)
-        content ||= ""
+      def tree_related(issue, level_arg, subject_arg, task_arg)
+        content ||= "\r\n"
         if level_arg == 'all' || level_arg > 0
-          self.relations_from.map(&:issue_to_id).each do |related_id|
+          issue.relations_from.map(&:issue_to_id).each do |related_id|
             issue  = Issue.find(related_id)
-
+            content += "\r\n\r\n"
             if subject_arg == 'none'
               content += ""
             elsif subject_arg.is_a?(Fixnum)
-
               case task_arg
                 when 'full'
-                  content += " <h#{subject_arg}> ##{issue.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{issue.tracker.name} ##{issue.id} #{issue.subject}"
                 when 'link'
-                  content += " <h#{subject_arg}> #{issue.subject} ##{issue.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{issue.subject} ##{issue.id}"
                 else
-                  content += " <h#{subject_arg}> #{issue.subject} ##{issue.id} </h#{subject_arg}>"
+                  content += "h#{subject_arg}. #{issue.subject}"
               end
             end
-
-            content += RedCloth.new(issue.description).to_html + "<br>"
-            content += issue.tree_child(level_arg=='all' ? 'all' : level_arg -1, subject_arg == 'none' ? 'none' : subject_arg + 1, task_arg)
+            content += "\r\n\r\n#{issue.description}"
+            content += tree_child(issue, level_arg == 'all' ? 'all' : level_arg -1, subject_arg == 'none' ? 'none' : subject_arg + 1, task_arg)
+            content += "\r\n\r\n"
           end
         end
         return content
