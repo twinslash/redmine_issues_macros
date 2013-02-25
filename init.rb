@@ -84,23 +84,28 @@ Redmine::WikiFormatting::Macros.register do
         content = 'Fill the necessary argument: !{{issue(task_id)}}'
       else
         task_id = task_id.to_i
-
-        if subject_arg.nil? || subject_arg.empty?
-          subject_arg = 3
-        else
-          subject_arg = subject_arg.to_i unless subject_arg == 'none'
-        end
-
-          content = Issue.find(task_id).representate_issue(subject_arg, task_arg).insert(0, "<br/>")
-          content = auto_link content
-          case task_arg
-            when "link"
-              content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
-            when "full"
-              content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
-            else
-              content.gsub!(/ #(\d+)/,"").html_safe
+        if User.current.allowed_to?(:view_issues, Issue.find(task_id).project)
+          if subject_arg.nil? || subject_arg.empty?
+            subject_arg = 3
+          else
+            subject_arg = subject_arg.to_i unless subject_arg == 'none'
           end
+
+            content = Issue.find(task_id).representate_issue(subject_arg, task_arg).insert(0, "<br/>")
+            content.gsub!(/(\{\{related_issues.*\}\})/) { Issue.find(task_id).tree_related('all', subject_arg, task_arg)}
+            content.gsub!(/(\{\{child_issues.*\}\})/) { Issue.find(task_id).tree_child('all', subject_arg, task_arg)}
+            content = auto_link content
+            case task_arg
+              when "link"
+                content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => false, :tracker => false)}"}.html_safe
+              when "full"
+                content.gsub!(/ #(\d+)/) { |id| " #{link_to_issue(Issue.find(id.delete('#')), :subject => true, :tracker => true)}"}.html_safe
+              else
+                content.gsub!(/ #(\d+)/,"").html_safe
+            end
+        else
+            ""
+        end
       end
   end
 end

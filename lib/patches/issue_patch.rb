@@ -30,7 +30,7 @@ module IssuePatch
       def tree_related(level_arg, subject_arg, task_arg)
         content ||= ""
         if level_arg == 'all' || level_arg > 0
-          self.relations.map(&:issue_to_id).each do |related_id|
+          self.relations_from.map(&:issue_to_id).each do |related_id|
             issue  = Issue.find(related_id)
 
             if subject_arg == 'none'
@@ -69,12 +69,10 @@ module IssuePatch
           end
           content += RedCloth.new(self.description).to_html + "<br>"
         end
+        p "content from representate================="
+        p content
         return content
       end
-
-
-
     end
-
   end
 end
