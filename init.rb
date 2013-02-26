@@ -51,7 +51,7 @@ Redmine::WikiFormatting::Macros.register do
     content = textilizable(tree_related(Issue.find(obj.id),level_arg, subject_arg, task_arg))
   end
 
-  desc "Insert the description of the passed tasks. Example: !{{issue}}"
+  desc "Insert the description of the passed tasks. Example: !{{issue(id)}}"
   macro :issue do |obj, args|
 
     task_id, subject_arg, task_arg = args[0..2] unless args.nil? || args.empty?
@@ -61,7 +61,7 @@ Redmine::WikiFormatting::Macros.register do
     else
       content ||= ""
       task_id = task_id.to_i
-      if User.current.allowed_to?(:view_issues, issue.project)
+      if issue.visible?
         if subject_arg.nil? || subject_arg.empty?
           subject_arg = 3
         else
@@ -81,6 +81,7 @@ Redmine::WikiFormatting::Macros.register do
               content += "h#{subject_arg}. #{issue.subject}"
           end
           content += "\r\n\r\n"
+          content = textilizable content
         end
         content += textilizable(issue, :description)
       else

@@ -4,7 +4,7 @@ module IssuePatch
     base.class_eval do
 
       def tree_child(issue, level_arg, subject_arg, task_arg)
-        content ||= "\r\n"
+        content ||= ""
         if level_arg == 'all' || level_arg > 0
           issue.children.each do |child|
             content += "\r\n\r\n"
@@ -55,23 +55,6 @@ module IssuePatch
         return content
       end
 
-      def representate_issue(subject_arg, task_arg)
-        content ||= ""
-        if subject_arg == 'none'
-          content += ""
-        elsif subject_arg.is_a?(Fixnum)
-          case task_arg
-            when 'full'
-              content += " <h#{subject_arg}> ##{self.id} </h#{subject_arg}>"
-            when 'link'
-              content += " <h#{subject_arg}> #{self.subject} ##{self.id} </h#{subject_arg}>"
-            else
-              content += " <h#{subject_arg}> #{self.subject} ##{self.id} </h#{subject_arg}>"
-          end
-          content += RedCloth.new(self.description).to_html + "<br>"
-        end
-        return content
-      end
     end
   end
 end
