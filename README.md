@@ -30,7 +30,7 @@ For {{issue(ID)}}:
 
 ### The usage examples
 Subtasks case:
-![Subtasks case](https://raw.github.com/twinslash/redmine_issues_macros/readme_images/case.png)
+![Subtasks case](https://raw.github.com/twinslash/redmine_issues_macros/blob/master/readme_images/case.png)
 
 {{child_issues}}
 ![Case](https://raw.github.com/twinslash/redmine_issues_macros/readme_images/11.png)
