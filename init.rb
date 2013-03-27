@@ -48,7 +48,11 @@ Redmine::WikiFormatting::Macros.register do
       subject_arg = subject_arg.to_i unless subject_arg == 'none'
     end
 
-    content = textilizable(tree_related(Issue.find(obj.id),level_arg, subject_arg, task_arg))
+    unless obj.nil?
+      content = textilizable(tree_related(Issue.find(obj.id),level_arg, subject_arg, task_arg))
+    else
+      content=""
+    end
   end
 
   desc "Insert the description of the passed tasks. Example: !{{issue(id)}}"
